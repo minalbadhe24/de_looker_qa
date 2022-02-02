@@ -3,7 +3,7 @@ view: Session_level_data {
     sql: SELECT a.session_ID, a.entry_intent ,d.first_intent, a.exit_intent, c.conversation_length_in_minutes , c.conversation_length_in_seconds , c.hour, c.count_of_msg , c.conv_date, c.platform, c.average_sentiment FROM
         (WITH entry_exit_intent AS
         (
-            SELECT session_ID , ROW_NUMBER() OVER(PARTITION BY session_ID ORDER BY time_stamp ASC) AS RowNumber, intent_triggered , time_stamp, date
+          SELECT session_ID , ROW_NUMBER() OVER(PARTITION BY session_ID ORDER BY time_stamp ASC) AS RowNumber, intent_triggered , time_stamp, date
           FROM `looker_training.dialogflow_cleaned_logs`AS dialogflow_cleaned_logs
         )
 
@@ -135,7 +135,11 @@ view: Session_level_data {
     style: integer
     sql: ${hour} ;;
   }
-
+  measure: avg_sentiment_score {
+    type: average
+    sql: ${average_sentiment} ;;
+    value_format: "0.00"
+  }
   dimension: one_Hour_frame {
   sql: CASE
         WHEN hour in (0) THEN "12am-2am"
@@ -168,7 +172,7 @@ view: Session_level_data {
   dimension: duration_bucket {
     type: string
     sql: CASE
-          WHEN conversation_length_in_minutes > 1 THEN "< 1 Mins"
+          WHEN conversation_length_in_minutes < 1 THEN "< 1 Mins"
           WHEN conversation_length_in_minutes <= 3 and conversation_length_in_minutes > 1 THEN '1-3 Mins'
           WHEN conversation_length_in_minutes <= 5 and conversation_length_in_minutes > 3 THEN '3-5 Mins'
           WHEN conversation_length_in_minutes <= 7 and conversation_length_in_minutes > 5 THEN '5-7 Mins'
@@ -179,11 +183,23 @@ view: Session_level_data {
   dimension: duration_order {
     type: number
     sql: CASE
-          WHEN conversation_length_in_minutes > 1 THEN 1
+          WHEN conversation_length_in_minutes < 1 THEN 1
           WHEN conversation_length_in_minutes <= 3 and conversation_length_in_minutes > 1 THEN 2
           WHEN conversation_length_in_minutes <= 5 and conversation_length_in_minutes > 3 THEN 3
           WHEN conversation_length_in_minutes <= 7 and conversation_length_in_minutes > 5 THEN 4
           ELSE 5
           END ;;
   }
+
+  measure: total_responses {
+    type: sum
+    sql: ${count_of_msg} ;;
+  }
+
+  measure: avg_conv_duration_seconds {
+    type: average
+    sql: ${conversation_length_in_seconds}/86400.0 ;;
+    value_format: "[mm]\"m \"ss\"s\""
+  }
+
 }

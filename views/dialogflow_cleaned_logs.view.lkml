@@ -130,14 +130,70 @@ view: dialogflow_cleaned_logs {
     sql: ${response_id} ;;
   }
 
-dimension: date {
-  type: date
-  sql: ${date_date} ;;
-}
+  dimension: date {
+    type: date
+    sql: ${date_date} ;;
+  }
 
-measure: Avg_queries_per_session {
-  type: number
-  sql: ${total_response_id}/${Total_Unique_Sessions} ;;
-  value_format: "0"
-}
+  measure: Avg_queries_per_session {
+    type: number
+    sql: ${total_response_id}/${Total_Unique_Sessions} ;;
+    value_format: "0"
+  }
+
+  measure: no_of_days {
+    type: count_distinct
+    sql: ${date_date} ;;
+  }
+
+  measure: avg_session_per_day {
+    type: number
+    sql: ${Total_Unique_Sessions}/${no_of_days} ;;
+    value_format: "0"
+  }
+
+  measure: avg_sentiment_score {
+    type: average
+    sql: ${sentiment_score};;
+    value_format: "0.000"
+  }
+  dimension: success_queries {
+    type: string
+    sql:CASE
+        WHEN intent_triggered LIKE '%fallback%' THEN 1
+        END;;
+  }
+  measure: total_success_queries {
+    type: count_distinct
+    sql: ${success_queries};;
+  }
+  measure: success_rate_new{
+    type: percent_of_total
+    sql: ${total_success_queries}/${total_response_id};;
+  }
+
+  measure: success_queries_count {
+    type: number
+    sql: SELECT intent_triggered FROM `looker_training.dialogflow_cleaned_logs` AS cleaned_logs WHERE intent_triggered LIKE '%fallback%';;
+  }
+
+  measure: success_rate {
+    type: number
+    sql: sum(if(${is_fallback},0,1))/${count};;
+    value_format_name: percent_2
+  }
+
+  dimension: sentiment_bucket{
+    type: string
+    sql: CASE
+          WHEN magnitude > 3 and sentiment_score between 0.25 and 1 THEN '1. Positive'
+          WHEN magnitude <= 3 and sentiment_score between 0.25 and 1 THEN '2. Partially Positive'
+          WHEN magnitude <= 3 and sentiment_score between -1 and -0.25 THEN '4. Partially Negative'
+          WHEN magnitude > 3 and sentiment_score between -1 and -0.25 THEN '5. Negative'
+          ELSE "3. Neutral"
+          END
+          ;;
+  }
+
+
 }

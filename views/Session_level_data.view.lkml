@@ -1,6 +1,6 @@
 view: Session_level_data {
   derived_table: {
-    sql: SELECT a.session_ID, a.entry_intent ,d.first_intent, a.exit_intent, c.conversation_length_in_minutes , c.conversation_length_in_seconds , c.hour, c.count_of_msg , c.conv_date, c.platform FROM
+    sql: SELECT a.session_ID, a.entry_intent ,d.first_intent, a.exit_intent, c.conversation_length_in_minutes , c.conversation_length_in_seconds , c.hour, c.count_of_msg , c.conv_date, c.platform, c.average_sentiment FROM
         (WITH entry_exit_intent AS
         (
             SELECT session_ID , ROW_NUMBER() OVER(PARTITION BY session_ID ORDER BY time_stamp ASC) AS RowNumber, intent_triggered , time_stamp, date
@@ -22,9 +22,9 @@ view: Session_level_data {
         LEFT JOIN
         ---------------------------------------------
 
-        (SELECT session_ID, TIMESTAMP_DIFF(end_time, start_time, MINUTE) as conversation_length_in_minutes, TIMESTAMP_DIFF(end_time, start_time, SECOND) as conversation_length_in_seconds, count_of_msg, conv_date, EXTRACT(HOUR FROM start_time) as hour, platform
+        (SELECT session_ID, TIMESTAMP_DIFF(end_time, start_time, MINUTE) as conversation_length_in_minutes, TIMESTAMP_DIFF(end_time, start_time, SECOND) as conversation_length_in_seconds, count_of_msg, conv_date, EXTRACT(HOUR FROM start_time) as hour, platform, average_sentiment
         FROM(
-        SELECT session_ID,  MAX(time_stamp) as end_time, MIN(time_stamp) as start_time, count(*) as count_of_msg, MIN(date) as conv_date, MAX(platform) as platform
+        SELECT session_ID,  MAX(time_stamp) as end_time, MIN(time_stamp) as start_time, count(*) as count_of_msg, MIN(date) as conv_date, MAX(platform) as platform, avg(sentiment_score) as average_sentiment
         FROM `looker_training.dialogflow_cleaned_logs` AS dialogflow_cleaned_logs
         group by session_ID
         ORDER BY count_of_msg DESC)) as c
@@ -96,6 +96,11 @@ view: Session_level_data {
     sql: ${TABLE}.platform ;;
   }
 
+  dimension: average_sentiment {
+    type: number
+    sql: ${TABLE}.average_sentiment ;;
+  }
+
   set: detail {
     fields: [
       session_id,
@@ -107,7 +112,8 @@ view: Session_level_data {
       hour,
       count_of_msg,
       conv_date,
-      platform
+      platform,
+      average_sentiment
     ]
   }
 
@@ -157,5 +163,27 @@ view: Session_level_data {
           WHEN magnitude <= 3 and sentiment_score between -1 and -0.25 THEN '4. Partially Negative'
           WHEN magnitude > 3 and sentiment_score between -1 and -0.25 THEN '5. Negative'
           ELSE "3. Neutral" ;;
+  }
+
+  dimension: duration_bucket {
+    type: string
+    sql: CASE
+          WHEN conversation_length_in_minutes > 1 THEN "< 1 Mins"
+          WHEN conversation_length_in_minutes <= 3 and conversation_length_in_minutes > 1 THEN '1-3 Mins'
+          WHEN conversation_length_in_minutes <= 5 and conversation_length_in_minutes > 3 THEN '3-5 Mins'
+          WHEN conversation_length_in_minutes <= 7 and conversation_length_in_minutes > 5 THEN '5-7 Mins'
+          ELSE "> 7 Mins"
+          END ;;
+  }
+
+  dimension: duration_order {
+    type: number
+    sql: CASE
+          WHEN conversation_length_in_minutes > 1 THEN 1
+          WHEN conversation_length_in_minutes <= 3 and conversation_length_in_minutes > 1 THEN 2
+          WHEN conversation_length_in_minutes <= 5 and conversation_length_in_minutes > 3 THEN 3
+          WHEN conversation_length_in_minutes <= 7 and conversation_length_in_minutes > 5 THEN 4
+          ELSE 5
+          END ;;
   }
 }

@@ -195,5 +195,13 @@ view: dialogflow_cleaned_logs {
           ;;
   }
 
+  measure: Number_of_Fallbacks {
+    type: sum
+    sql: CASE WHEN ${is_fallback} then 1 END ;;
+  }
 
+  measure: Number_of_Livegenttransfer{
+    type: sum
+    sql: CASE WHEN ${intent_triggered} LIKE "LiveAgentTransfer" then 1 END ;;
+  }
 }

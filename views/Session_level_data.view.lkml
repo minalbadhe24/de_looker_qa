@@ -47,6 +47,7 @@ view: Session_level_data {
 
   dimension: session_id {
     type: string
+    primary_key: yes
     sql: ${TABLE}.session_ID ;;
   }
 

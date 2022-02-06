@@ -35,14 +35,14 @@
     sql: ${TABLE}.Number_of_Livegenttransfer ;;
   }
 
-    measure: Session_Distribution {
+    dimension: Session_Distribution {
       description: "Identify how sessions have been handled by bot
-      Sessions are distributed in following category:
-      1. Number of sessions that were successfully handled with bot end to end
-      2. Number of sessions that were partially handled by the bot and had at least one query unanswered but not transferred to live agent
-      3. Number of sessions that were transferred to live agent and has at least one fallback query (i.e.bot not able to answer)
-      4. Number of sessions that were transferred to live agent as per the expected flow but had not fallback query"
-      type: number
+                    Sessions are distributed in following category:
+                    1. Number of sessions that were successfully handled with bot end to end
+                    2. Number of sessions that were partially handled by the bot and had at least one query unanswered but not transferred to live agent
+                    3. Number of sessions that were transferred to live agent and has at least one fallback query (i.e.bot not able to answer)
+                    4. Number of sessions that were transferred to live agent as per the expected flow but had not fallback query"
+      type: string
       sql:CASE
            WHEN ${Number_of_Fallbacks} = 0 AND ${Number_of_Livegenttransfer} =0 THEN "FullyDeflected"
            WHEN ${Number_of_Fallbacks} = 0 AND ${Number_of_Livegenttransfer} > 0 THEN "TransfertoLiveAgentFlow"
@@ -50,4 +50,19 @@
            WHEN ${Number_of_Fallbacks} > 0 AND ${Number_of_Livegenttransfer} >0 THEN "NotDeflected"
           END;;
     }
+
+  dimension: Deflection_Rate {
+    description: "Sessions are distributed in following category:
+                1. Number of sessions that were successfully handled with bot end to end -- Fully Deflected
+                2. Number of sessions that were partially handled by the bot and had at least one query unanswered but not transferred to live agent---> Fully Deflected
+                3. Number of sessions that were transferred to live agent and has at least one fallback query (i.e.bot not able to answer)--->Partially Deflected
+                4. Number of sessions that were transferred to live agent as per the expected flow but had not fallback query Not Deflected"
+    type: string
+    sql:CASE
+           WHEN ${Number_of_Fallbacks} = 0 AND ${Number_of_Livegenttransfer} =0 THEN "FullyDeflected"
+           WHEN ${Number_of_Fallbacks} = 0 AND ${Number_of_Livegenttransfer} > 0 THEN "Not Deflected"
+           WHEN ${Number_of_Fallbacks} > 0 AND ${Number_of_Livegenttransfer} =0 THEN "FullyDeflected"
+           WHEN ${Number_of_Fallbacks} > 0 AND ${Number_of_Livegenttransfer} >0 THEN "Partially Deflected"
+          END;;
+  }
  }

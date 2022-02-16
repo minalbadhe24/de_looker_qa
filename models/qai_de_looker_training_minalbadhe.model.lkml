@@ -16,5 +16,12 @@ explore: dialogflow_cleaned_logs {
         relationship: many_to_one
         sql_on: ${dialogflow_cleaned_logs.session_id}=${session_distribution.session_ID} ;;
       }
+      join: intent_co_occurence {
+      type: inner
+      relationship: many_to_one
+      sql_on: ${dialogflow_cleaned_logs.intent_triggered} != ${intent_co_occurence.intent_triggered}
+                and
+                ${dialogflow_cleaned_logs.session_id}=${intent_co_occurence.session_id};;
+                }
   }
 explore: Session_level_data {}

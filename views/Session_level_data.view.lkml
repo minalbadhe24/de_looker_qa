@@ -38,7 +38,7 @@ view: Session_level_data {
         where RowNumber = 1) as d
         on c.session_ID = d.session_ID
 
-    bind_all_filters: yes
+
         ;;
 
 

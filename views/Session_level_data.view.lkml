@@ -48,6 +48,11 @@ view: Session_level_data {
     drill_fields: [detail*]
   }
 
+  measure: count_session_id {
+    type: count_distinct
+    sql: ${session_id} ;;
+  }
+
   dimension: session_id {
     type: string
     primary_key: yes
@@ -128,6 +133,7 @@ view: Session_level_data {
       conversation_length_in_minutes,
       conversation_length_in_seconds,
       hour,
+      date,
       count_of_msg,
       platform,
       average_sentiment

@@ -24,4 +24,9 @@ explore: dialogflow_cleaned_logs {
                 ${dialogflow_cleaned_logs.session_id}=${intent_co_occurence.session_id};;
                 }
   }
-explore: Session_level_data {}
+explore: Session_level_data {join: conversation_length {
+    type: left_outer
+    relationship: one_to_one
+    sql_on: session_level_data.session_id = conversation_length.session_id ;;
+    # fields: []
+  }}

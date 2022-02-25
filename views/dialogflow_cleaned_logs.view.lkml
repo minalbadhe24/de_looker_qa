@@ -30,6 +30,7 @@ view: dialogflow_cleaned_logs {
   dimension: intent_triggered {
     type: string
     sql: ${TABLE}.intent_triggered ;;
+    suggest_persist_for: "1 minutes"
   }
 
   dimension: is_fallback {
@@ -137,7 +138,7 @@ view: dialogflow_cleaned_logs {
 
   measure: Avg_queries_per_session {
     type: number
-    sql: ${total_response_id}/NULLIF(${Total_Unique_Sessions},0);;
+    sql:${total_response_id}/NULLIF(${Total_Unique_Sessions},0);;
     value_format: "0"
   }
 
@@ -148,7 +149,7 @@ view: dialogflow_cleaned_logs {
 
   measure: avg_session_per_day {
     type: number
-    sql: ${Total_Unique_Sessions}/NULLLIF(${no_of_days},0);;
+    sql:${Total_Unique_Sessions}/NULLIF(${no_of_days},0);;
     value_format: "0"
   }
 
@@ -169,7 +170,7 @@ view: dialogflow_cleaned_logs {
   }
   measure: success_rate_new{
     type: percent_of_total
-    sql: ${total_success_queries}/NULLIF(${total_response_id},0);;
+    sql: ${total_success_queries}/${total_response_id};;
   }
 
   measure: success_queries_count {

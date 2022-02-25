@@ -39,7 +39,7 @@ view: intent_co_occurence {
       column: intent_triggered {
         field: dialogflow_cleaned_logs.intent_triggered
         }
-
+      bind_all_filters: yes
   }
   }
 

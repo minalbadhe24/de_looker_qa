@@ -12,6 +12,7 @@
       column: Number_of_Livegenttransfer {
         field: dialogflow_cleaned_logs.Number_of_Livegenttransfer
       }
+      bind_all_filters: yes
     }
 }
 

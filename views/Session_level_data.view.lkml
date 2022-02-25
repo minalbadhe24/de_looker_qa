@@ -37,7 +37,12 @@ view: Session_level_data {
         where intent_triggered != 'Default Welcome Intent')
         where RowNumber = 1) as d
         on c.session_ID = d.session_ID
- ;;
+
+    bind_all_filters: yes
+        ;;
+
+
+
   }
 
   measure: count {
@@ -141,24 +146,32 @@ view: Session_level_data {
     sql: ${average_sentiment} ;;
     value_format: "0.00"
   }
-  dimension: one_Hour_frame {
+  dimension: one_Hour_frame_case{
   sql: CASE
-        WHEN hour in (0) THEN "12am-2am"
-        WHEN hour in (1) THEN "2am-4am"
-        WHEN hour in (2) THEN "4am-6am"
-        WHEN hour in (3) THEN "6am-8am"
-        WHEN hour in (4) THEN "8am-10am"
-        WHEN hour in (5) THEN "10am-12pm"
-        WHEN hour in (6) THEN "12pm-2pm"
-        WHEN hour in (7) THEN "2pm-4pm"
-        WHEN hour in (8) THEN "4pm-6pm"
-        WHEN hour in (9) THEN "6pm-8pm"
-        WHEN hour in (10) THEN "8pm-10pm"
-        WHEN hour in (11) THEN "10pm-12am"
-        WHEN hour in (12) THEN "10pm-12am"
-        WHEN hour in (13) THEN "10pm-12am"
-        WHEN hour in (14) THEN "10pm-12am"
-        WHEN hour in (15) THEN "10pm-12am"
+        WHEN ${hour} in (0) THEN "12am-1am"
+        WHEN ${hour} in (1) THEN "1am-2am"
+        WHEN ${hour} in (2) THEN "2am-3am"
+        WHEN ${hour} in (3) THEN "3am-4am"
+        WHEN ${hour} in (4) THEN "4am-5am"
+        WHEN ${hour} in (5) THEN "5am-6am"
+        WHEN ${hour} in (6) THEN "6am-7am"
+        WHEN ${hour} in (7) THEN "7am-8am"
+        WHEN ${hour} in (8) THEN "8am-9am"
+        WHEN ${hour} in (9) THEN "9am-10am"
+        WHEN ${hour} in (10) THEN "10am-11am"
+        WHEN ${hour} in (11) THEN "11am-12pm"
+        WHEN ${hour} in (12) THEN "12pm-1pm"
+        WHEN ${hour} in (13) THEN "1pm-2pm"
+        WHEN ${hour} in (14) THEN "2pm-3pm"
+        WHEN ${hour} in (15) THEN "3pm-4pm"
+        WHEN ${hour} in (16) THEN "4pm-5pm"
+        WHEN ${hour} in (17) THEN "5pm-6pm"
+        WHEN ${hour} in (18) THEN "6pm-7pm"
+        WHEN ${hour} in (19) THEN "7pm-8pm"
+        WHEN ${hour} in (20) THEN "8pm-9pm"
+        WHEN ${hour} in (21) THEN "9pm-10pm"
+        WHEN ${hour} in (22) THEN "10pm-11pm"
+        WHEN ${hour} in (23) THEN "11pm-12am"
       END;;
   }
   dimension: sentiment_bucket_logic {

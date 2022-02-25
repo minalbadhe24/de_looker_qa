@@ -89,11 +89,11 @@ view: Session_level_data {
     sql: ${TABLE}.count_of_msg ;;
   }
 
-  # dimension: date {
-  #   type: date
-  #   datatype: date
-  #   sql: ${TABLE}.conv_date ;;
-  # }
+  dimension: date {
+    type: date
+    datatype: date
+    sql: ${TABLE}.date ;;
+  }
 
   dimension_group: date {
     type: time
@@ -158,6 +158,7 @@ view: Session_level_data {
     value_format: "0.00"
   }
   dimension: one_Hour_frame_case{
+  type: string
   sql: CASE
         WHEN ${hour} in (0) THEN "12am-1am"
         WHEN ${hour} in (1) THEN "1am-2am"
@@ -186,6 +187,7 @@ view: Session_level_data {
       END;;
   }
   dimension: sentiment_bucket_logic {
+    type: string
     sql: CASE
           WHEN magnitude > 3 and sentiment_score between 0.25 and 1 THEN '1. Positive'
           WHEN magnitude <= 3 and sentiment_score between 0.25 and 1 THEN '2. Partially Positive'

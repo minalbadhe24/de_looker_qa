@@ -1,6 +1,6 @@
 view: Session_level_data {
   derived_table: {
-    sql: SELECT a.session_ID, a.entry_intent ,d.first_intent, a.exit_intent, c.conversation_length_in_minutes , c.conversation_length_in_seconds , c.hour, c.count_of_msg , c.conv_date, c.platform, c.average_sentiment FROM
+    sql: SELECT a.session_ID, a.entry_intent ,d.first_intent, a.exit_intent, c.conversation_length_in_minutes , c.conversation_length_in_seconds , c.hour, c.count_of_msg , c.date, c.platform, c.average_sentiment FROM
         (WITH entry_exit_intent AS
         (
           SELECT session_ID , ROW_NUMBER() OVER(PARTITION BY session_ID ORDER BY time_stamp ASC) AS RowNumber, intent_triggered , time_stamp, date
@@ -22,9 +22,9 @@ view: Session_level_data {
         LEFT JOIN
         ---------------------------------------------
 
-        (SELECT session_ID, TIMESTAMP_DIFF(end_time, start_time, MINUTE) as conversation_length_in_minutes, TIMESTAMP_DIFF(end_time, start_time, SECOND) as conversation_length_in_seconds, count_of_msg, conv_date, EXTRACT(HOUR FROM start_time) as hour, platform, average_sentiment
+        (SELECT session_ID, TIMESTAMP_DIFF(end_time, start_time, MINUTE) as conversation_length_in_minutes, TIMESTAMP_DIFF(end_time, start_time, SECOND) as conversation_length_in_seconds, count_of_msg, date, EXTRACT(HOUR FROM start_time) as hour, platform, average_sentiment
         FROM(
-        SELECT session_ID,  MAX(time_stamp) as end_time, MIN(time_stamp) as start_time, count(*) as count_of_msg, MIN(date) as conv_date, MAX(platform) as platform, avg(sentiment_score) as average_sentiment
+        SELECT session_ID,  MAX(time_stamp) as end_time, MIN(time_stamp) as start_time, count(*) as count_of_msg, MIN(date) as date, MAX(platform) as platform, avg(sentiment_score) as average_sentiment
         FROM `looker_training.dialogflow_cleaned_logs` AS dialogflow_cleaned_logs
         group by session_ID
         ORDER BY count_of_msg DESC)) as c
@@ -37,8 +37,6 @@ view: Session_level_data {
         where intent_triggered != 'Default Welcome Intent')
         where RowNumber = 1) as d
         on c.session_ID = d.session_ID
-
-
         ;;
 
 
@@ -91,10 +89,24 @@ view: Session_level_data {
     sql: ${TABLE}.count_of_msg ;;
   }
 
-  dimension: conv_date {
-    type: date
+  # dimension: date {
+  #   type: date
+  #   datatype: date
+  #   sql: ${TABLE}.conv_date ;;
+  # }
+
+  dimension_group: date {
+    type: time
+    timeframes: [
+      raw,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    convert_tz: yes
     datatype: date
-    sql: ${TABLE}.conv_date ;;
   }
 
   dimension: platform {
@@ -117,7 +129,6 @@ view: Session_level_data {
       conversation_length_in_seconds,
       hour,
       count_of_msg,
-      conv_date,
       platform,
       average_sentiment
     ]
@@ -212,6 +223,7 @@ view: Session_level_data {
 
   measure: avg_conv_duration_seconds {
     type: average
+    sql_distinct_key: ${session_id} ;;
     sql: ${conversation_length_in_seconds}/86400.0 ;;
     value_format: "[mm]\"m \"ss\"s\""
   }

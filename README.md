@@ -1,1 +1,0 @@
-# looker_training_qa

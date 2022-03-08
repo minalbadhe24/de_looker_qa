@@ -2,6 +2,7 @@ connection: "qai_de_looker_training_qa_minal_badhe"
 
 # include all the views
 include: "/views/**/*.view"
+include: "/Dashboard/looker_training.dashboard"
 
 datagroup: qai_de_looker_training_minalbadhe_default_datagroup {
   # sql_trigger: SELECT MAX(id) FROM etl_log;;
